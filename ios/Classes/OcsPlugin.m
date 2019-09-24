@@ -3,6 +3,10 @@
 #import "WLLocationViewController.h"
 #import "WLMyPositionViewController.h"
 
+@interface OcsPlugin() <BMKGeneralDelegate>
+
+@end
+
 @implementation OcsPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -25,7 +29,7 @@
         NSAssert([key isKindOfClass:[NSString class]] && key != nil && key.length > 0, @"百度key必须是字符串");
         NSAssert(key != nil && key.length > 0, @"百度key不能为空");
         BMKMapManager *mapManager = [[BMKMapManager alloc] init];
-        bool success = [mapManager start:key generalDelegate:nil];
+        bool success = [mapManager start:key generalDelegate:self];
         result([NSNumber numberWithBool:success]);
     } else if ([@"sendLocation" isEqualToString:call.method]) {
         // 选择位置
@@ -61,6 +65,22 @@
     else {
         result(FlutterMethodNotImplemented);
     }
+}
+
+/**
+ *返回网络错误
+ *@param iError 错误号
+ */
+- (void)onGetNetworkState:(int)iError{
+    NSLog(@"onGetNetworkState: %@", @(iError));
+}
+
+/**
+ *返回授权验证错误
+ *@param iError 错误号 : 为0时验证通过，具体参加BMKPermissionCheckResultCode
+ */
+- (void)onGetPermissionState:(int)iError{
+    NSLog(@"onGetPermissionState:%@", @(iError));
 }
 
 @end
