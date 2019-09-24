@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.app.ActivityCompat;
+
+import androidx.annotation.VisibleForTesting;
+import androidx.core.app.ActivityCompat;
+
 import com.jzxl.ocs_plugin.activity.BaiDuMapLocationActivity;
 import com.jzxl.ocs_plugin.entity.LocationInfo;
 
