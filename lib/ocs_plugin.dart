@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -12,13 +13,20 @@ class OcsPlugin {
     return version;
   }
 
+  /// 注册百度的key
+  /// iOS需要注册，android在AndroidManifest.xml配置
+  static Future<bool>  registerKey(String key) async {
+    assert(Platform.isIOS, 'android在AndroidManifest.xml配置，不需要调用这个方法');
+    if(!Platform.isIOS) return false;
+    final bool result = await _channel.invokeMethod('registerKey', key);
+    return result;
+  }
+
   /// 发送位置/选择位置
   /// [baiDuKey] IOS传递百度Key
-  static Future<LocationInfo> sendLocation({String baiDuKey}) async {
+  static Future<LocationInfo> sendLocation() async {
     final Map map =
-        await _channel.invokeMethod('sendLocation', <String, dynamic>{
-      'baiDuKey': baiDuKey,
-    });
+    await _channel.invokeMethod('sendLocation');
     if (map == null) {
       return null;
     }

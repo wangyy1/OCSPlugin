@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/location_info.dart';
 
@@ -15,8 +15,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  double _latitude = 0.0;
-  double _longitude = 0.0;
+  double _latitude = 39.844879;
+  double _longitude = 116.100201;
   String _address = '';
 
 
@@ -24,6 +24,14 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
+
+    // 注册百度key
+    // 这里输入自己注册的百度key
+    if(Platform.isIOS) {
+      OcsPlugin.registerKey('1QnYI8z9TTWkwWX5iHBPrUPd').then((success){
+        print('register Baidu key: $success');
+      });
+    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -61,11 +69,13 @@ class _MyAppState extends State<MyApp> {
               child: Text('选择位置'),
               onPressed: () async {
                 LocationInfo locationInfo = await OcsPlugin.sendLocation();
-                setState(() {
-                  _latitude = locationInfo.latitude;
-                  _longitude = locationInfo.longitude;
-                  _address = locationInfo.address;
-                });
+                if(locationInfo != null) {
+                  setState(() {
+                    _latitude = locationInfo.latitude;
+                    _longitude = locationInfo.longitude;
+                    _address = locationInfo.address;
+                  });
+                }
               },
             ),
             RaisedButton(
