@@ -15,6 +15,7 @@ import android.util.Log;
 import com.jzxl.ocs_plugin.AudioplayersPlugin;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, SensorEventListener {
 
@@ -38,6 +39,7 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
     private AudioplayersPlugin ref;
     private Context context;
     private Sensor sensor;
+    private PowerManager.WakeLock wakeLock;
 
     public WrappedMediaPlayer(AudioplayersPlugin ref, String playerId, Context context) {
         this.ref = ref;
@@ -50,6 +52,10 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
             this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
             sensor = this.sensorManager.getDefaultSensor(8);
             this.sensorManager.registerListener(this, sensor, 3);
+            //息屏设置
+            PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            wakeLock = mPowerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
+                    UUID.randomUUID().toString());
         }
     }
 
@@ -172,6 +178,29 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
             }
         } else {
             this.release();
+            if (this.sensorManager != null) {
+                this.sensorManager.unregisterListener(this);
+            }
+            this.sensorManager = null;
+            if (wakeLock.isHeld())
+                wakeLock.release();
+            wakeLock = null;
+        }
+    }
+
+    private void stop2() {
+        if (this.released) {
+            return;
+        }
+
+        if (releaseMode != ReleaseMode.RELEASE) {
+            if (this.playing) {
+                this.playing = false;
+                this.player.pause();
+                this.player.seekTo(0);
+            }
+        } else {
+            this.release();
         }
     }
 
@@ -187,12 +216,6 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
         this.player.reset();
         this.player.release();
         this.player = null;
-
-        if (this.sensorManager != null) {
-            this.sensorManager.unregisterListener(this);
-        }
-
-        this.sensorManager = null;
 
         this.prepared = false;
         this.released = true;
@@ -335,17 +358,34 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
                     if (playerModel != PlayerModel.VOICE_CALL) {
                         return;
                     }
-                    stop();
+                    //唤醒设备
+                    if (wakeLock.isHeld()) {
+                        wakeLock.release();
+                    }
+                    int currentPosition = getCurrentPosition();
+//                    stop2();
+//                    configAttributes(PlayerModel.MUSIC, stayAwake, context.getApplicationContext());
+//                    setVolume(volume);
+//                    setUrl(url, true);
+//                    seek(currentPosition);
+//                    play();
+                    release();
                     configAttributes(PlayerModel.MUSIC, stayAwake, context.getApplicationContext());
-                    setVolume(volume);
-                    setUrl(url, true);
-                    seek(0);
+                    seek(currentPosition);
                     play();
                 } else {
-                    stop();
+                    //关闭屏幕
+                    if (!wakeLock.isHeld()) {
+                        wakeLock.acquire();
+                    }
+//                    stop2();
+//                    configAttributes(PlayerModel.VOICE_CALL, stayAwake, context.getApplicationContext());
+//                    setVolume(volume);
+//                    setUrl(url, true);
+//                    seek(0);
+//                    play();
+                    release();
                     configAttributes(PlayerModel.VOICE_CALL, stayAwake, context.getApplicationContext());
-                    setVolume(volume);
-                    setUrl(url, true);
                     seek(0);
                     play();
                 }

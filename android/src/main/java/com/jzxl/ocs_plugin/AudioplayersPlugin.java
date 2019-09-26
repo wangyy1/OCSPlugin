@@ -35,7 +35,7 @@ public class AudioplayersPlugin implements MethodCallHandler {
     private final Activity activity;
 
     public static void registerWith(final Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "xyz.luan/audioplayers");
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.audioPlayer.channel");
         channel.setMethodCallHandler(new AudioplayersPlugin(channel, registrar.activity()));
     }
 
@@ -68,16 +68,15 @@ public class AudioplayersPlugin implements MethodCallHandler {
                 final String url = call.argument("url");
                 final double volume = call.argument("volume");
                 final Integer position = call.argument("position");
-                final String playerMode = call.argument("playerMode");
+                final boolean proximityEnable = call.argument("proximityEnable");
                 final boolean isLocal = call.argument("isLocal");
                 final boolean stayAwake = call.argument("stayAwake");
-                Log.e(TAG, "handleMethodCall: " + playerMode );
-                if ("PlayerMode.SPEAKER".equals(playerMode)) {
+                if (proximityEnable) {
                     Log.e(TAG, "handleMethodCall: SPEAKER" );
-                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
-                } else if ("PlayerMode.STETHOSCOPE".equals(playerMode)) {
-                    Log.e(TAG, "handleMethodCall: STETHOSCOPE" );
                     player.configAttributes(PlayerModel.values()[0], stayAwake, activity.getApplicationContext());
+                } else  {
+                    Log.e(TAG, "handleMethodCall: STETHOSCOPE" );
+                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
                 }
                 player.setVolume(volume);
                 player.setUrl(url, isLocal);

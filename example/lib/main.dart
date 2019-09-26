@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:ocs_plugin/ocs_plugin.dart';
+import 'package:ocs_plugin/ocs_audio_player.dart';
 import 'package:ocs_plugin/location_info.dart';
 
 const kUrl1 = 'https://luan.xyz/files/audio/ambient_c_motion.mp3';
@@ -92,7 +93,7 @@ class _MyAppState extends State<MyApp> {
               child: Text('播放语音'),
               onPressed: () {
                 OCSAudioPlayer player = OCSAudioPlayer();
-                player.play(kUrl1);
+                player.play(kUrl1, proximityMonitoringEnabled: false);
               },
             ),
           ],
