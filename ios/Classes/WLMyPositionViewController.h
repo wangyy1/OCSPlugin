@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void (^ON_BACK_BLOCK)();
+typedef void (^ON_BACK_BLOCK)(void);
 
 @interface WLMyPositionViewController : UIViewController
 
