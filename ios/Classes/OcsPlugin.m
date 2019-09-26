@@ -265,6 +265,13 @@ static NSMutableDictionary * players;
             if (![self isHeadSetPlugging]) {
                 if ([[UIDevice currentDevice] proximityState]) {
                     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+                
+                    for (NSString* playerId in players) {
+                        NSMutableDictionary* playInfo = players[playerId];
+                        if (playInfo[@"ProximityMonitor"]) {
+                            [self seek:playerId time:CMTimeMake(0, 1)];
+                        }
+                    }
                 } else {
                     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
                 }
