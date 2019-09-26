@@ -6,6 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/location_info.dart';
 
+const kUrl1 = 'https://luan.xyz/files/audio/ambient_c_motion.mp3';
+const kUrl2 = 'https://luan.xyz/files/audio/nasa_on_a_mission.mp3';
+const kUrl3 = 'http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1xtra_mf_p';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -82,6 +86,13 @@ class _MyAppState extends State<MyApp> {
               child: Text('查看位置'),
               onPressed: () {
                 OcsPlugin.lookLocation('$_latitude', '$_longitude', '$_address');
+              },
+            ),
+            RaisedButton(
+              child: Text('播放语音'),
+              onPressed: () {
+                OCSAudioPlayer player = OCSAudioPlayer();
+                player.play(kUrl1);
               },
             ),
           ],

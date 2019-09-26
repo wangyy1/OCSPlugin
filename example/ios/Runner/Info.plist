@@ -25,13 +25,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>使用位置</string>
+	<string>需要使用位置获取定位</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>使用位置</string>
+	<string>需要使用位置获取定位</string>
 	<key>NSLocationUsageDescription</key>
-	<string>使用位置</string>
+	<string>需要使用位置获取定位</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>使用位置</string>
+	<string>需要使用位置获取定位</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
