@@ -30,20 +30,20 @@
 
 @end
 
-NSString *const AudioplayersPluginStop = @"AudioplayersPluginStop";
-typedef void (^VoidCallback)(NSString * playerId);
+NSString *const AudioplayersPluginStop = @"OCSAudioplayersPluginStop";
+typedef void (^OCSVoidCallback)(NSString * playerId);
 /// 播放时间的一些监听器
-NSMutableSet *timeobservers;
+NSMutableSet *ocs_timeobservers;
 /// 一些硬件的监听，距离传感器，耳机插拔
-NSMutableSet *deviceObservers;
+NSMutableSet *ocs_deviceObservers;
 /// 音频通道
-FlutterMethodChannel *_channel_audioplayer;
+FlutterMethodChannel *_ocs_channel_audioplayer;
 /// 是否已经被释放
-bool _isDealloc = false;
+bool _ocs_is_dealloc = false;
 /// 是否启动距离传感器，自动切换听筒和扬声器
 bool proximityMonitoringEnabled = false;
 /// 播放缓存
-static NSMutableDictionary * players;
+static NSMutableDictionary * ocsPlayers;
 
 @interface OcsPlugin()
 /// 暂停
@@ -119,7 +119,7 @@ static NSMutableDictionary * players;
     FlutterMethodChannel* audioPlayer_channel = [FlutterMethodChannel
                                                  methodChannelWithName:@"ocs.audioPlayer.channel"
                                                  binaryMessenger:[registrar messenger]];
-    _channel_audioplayer = audioPlayer_channel;
+    _ocs_channel_audioplayer = audioPlayer_channel;
     
     [audioPlayer_channel setMethodCallHandler:^(FlutterMethodCall * _Nonnull call, FlutterResult  _Nonnull result) {
         
@@ -256,8 +256,8 @@ static NSMutableDictionary * players;
         UINavigationBar.appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
         
         // 设置音频播放的一些默认设置
-        _isDealloc = false;
-        players = [[NSMutableDictionary alloc] init];
+        _ocs_is_dealloc = false;
+        ocsPlayers = [[NSMutableDictionary alloc] init];
         // 监听插件暂停，但是这个通知不知道在什么位置发送的
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(needStop) name:AudioplayersPluginStop object:nil];
         // 监听距离感应器的变化，用来切换听筒还是扬声器
@@ -266,8 +266,8 @@ static NSMutableDictionary * players;
                 if ([[UIDevice currentDevice] proximityState]) {
                     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
                 
-                    for (NSString* playerId in players) {
-                        NSMutableDictionary* playInfo = players[playerId];
+                    for (NSString* playerId in ocsPlayers) {
+                        NSMutableDictionary* playInfo = ocsPlayers[playerId];
                         if (playInfo[@"ProximityMonitor"]) {
                             [self seek:playerId time:CMTimeMake(0, 1)];
                         }
@@ -284,12 +284,12 @@ static NSMutableDictionary * players;
             //          AVAudioSessionPortDescription *portDescription= [routeDescription.outputs firstObject];
         }];
         
-        if (deviceObservers == nil) {
-            deviceObservers = [NSMutableSet set];
+        if (ocs_deviceObservers == nil) {
+            ocs_deviceObservers = [NSMutableSet set];
         }
         
-        [deviceObservers addObject:observer];
-        [deviceObservers addObject:observer1];
+        [ocs_deviceObservers addObject:observer];
+        [ocs_deviceObservers addObject:observer1];
     }
     return self;
 }
@@ -306,15 +306,15 @@ static NSMutableDictionary * players;
 
 /// 监听到插件停止的时候destory播放器
 - (void)needStop {
-    _isDealloc = true;
+    _ocs_is_dealloc = true;
     [self destory];
 }
 
 /// 初始化播放信息，混存中没有则新建，然后加入缓存
 -(void) initPlayerInfo: (NSString *) playerId {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     if (!playerInfo) {
-        players[playerId] = [@{@"isPlaying": @false, @"volume": @(1.0), @"looping": @(false)} mutableCopy];
+        ocsPlayers[playerId] = [@{@"isPlaying": @false, @"volume": @(1.0), @"looping": @(false)} mutableCopy];
     }
 }
 
@@ -329,10 +329,10 @@ static NSMutableDictionary * players;
        isLocal: (bool) isLocal
       playerId: (NSString*) playerId
 proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
-       onReady:(VoidCallback)onReady
+       onReady:(OCSVoidCallback)onReady
 {
     // 获取缓存的播放信息
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     // 获取缓存的player
     AVPlayer *player = playerInfo[@"player"];
     // 获取缓存的播放进度监听器
@@ -383,7 +383,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
                 [self onTimeInterval:playerId time:time];
             }];
             // 混存监听对象
-            [timeobservers addObject:@{@"player":player, @"observer":timeObserver}];
+            [ocs_timeobservers addObject:@{@"player":player, @"observer":timeObserver}];
         }
         
         // 在通知中心监听播放播放完成，完成后执行对应的回调
@@ -450,7 +450,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
          playerId:playerId
      proximityMonitoringEnabled:proximityMonitoringEnabled
           onReady:^(NSString * playerId) {
-              NSMutableDictionary * playerInfo = players[playerId];
+              NSMutableDictionary * playerInfo = ocsPlayers[playerId];
               if(proximityMonitoringEnabled) {
                   [weakSelf monitorProximityMonitor];
               }
@@ -480,7 +480,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 /// 更新播放进度
 -(void) updateDuration: (NSString *) playerId
 {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     
     CMTime duration = [[[player currentItem]  asset] duration];
@@ -488,13 +488,13 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
     if(CMTimeGetSeconds(duration)>0){
         NSLog(@"ios -> invokechannel");
         int mseconds= CMTimeGetSeconds(duration)*1000;
-        [_channel_audioplayer invokeMethod:@"audio.onDuration" arguments:@{@"playerId": playerId, @"value": @(mseconds)}];
+        [_ocs_channel_audioplayer invokeMethod:@"audio.onDuration" arguments:@{@"playerId": playerId, @"value": @(mseconds)}];
     }
 }
 
 /// 获取播放进度，毫秒级
 -(int) getDuration: (NSString *) playerId {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     
     CMTime duration = [[[player currentItem]  asset] duration];
@@ -507,20 +507,19 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 -(void) onTimeInterval: (NSString *) playerId
                   time: (CMTime) time {
     // NSLog(@"ios -> onTimeInterval...");
-    if (_isDealloc) {
+    if (_ocs_is_dealloc) {
         return;
     }
     int mseconds =  CMTimeGetSeconds(time)*1000;
     // NSLog(@"asdff %@ - %d", playerId, mseconds);
-    
-    [_channel_audioplayer invokeMethod:@"audio.onCurrentPosition" arguments:@{@"playerId": playerId, @"value": @(mseconds)}];
+    [_ocs_channel_audioplayer invokeMethod:@"audio.onCurrentPosition" arguments:@{@"playerId": playerId, @"value": @(mseconds)}];
     
     //    NSLog(@"asdff end");
 }
 
 /// 暂停播放
 -(void) pause: (NSString *) playerId {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     
     [ player pause ];
@@ -529,7 +528,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 
 /// 继续播放
 -(void) resume: (NSString *) playerId {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     [player play];
     [playerInfo setObject:@true forKey:@"isPlaying"];
@@ -538,7 +537,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 /// 设置声音
 -(void) setVolume: (float) volume
          playerId:  (NSString *) playerId {
-    NSMutableDictionary *playerInfo = players[playerId];
+    NSMutableDictionary *playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     playerInfo[@"volume"] = @(volume);
     [ player setVolume:volume ];
@@ -547,13 +546,13 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 /// 设置循环
 -(void) setLooping: (bool) looping
           playerId:  (NSString *) playerId {
-    NSMutableDictionary *playerInfo = players[playerId];
+    NSMutableDictionary *playerInfo = ocsPlayers[playerId];
     [playerInfo setObject:@(looping) forKey:@"looping"];
 }
 
 /// 停止播放
 -(void) stop: (NSString *) playerId {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     
     if ([playerInfo[@"isPlaying"] boolValue]) {
         [ self pause:playerId ];
@@ -565,7 +564,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 /// 跳转到指定时间
 -(void) seek: (NSString *) playerId
         time: (CMTime) time {
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     AVPlayer *player = playerInfo[@"player"];
     [[player currentItem] seekToTime:time];
 }
@@ -573,7 +572,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 /// 播放完成
 -(void) onSoundComplete: (NSString *) playerId {
     NSLog(@"ios -> onSoundComplete...");
-    NSMutableDictionary * playerInfo = players[playerId];
+    NSMutableDictionary * playerInfo = ocsPlayers[playerId];
     
     if (![playerInfo[@"isPlaying"] boolValue]) {
         return;
@@ -590,17 +589,17 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
         [ self resume:playerId ];
     }
     
-    [ _channel_audioplayer invokeMethod:@"audio.onComplete" arguments:@{@"playerId": playerId}];
+    [ _ocs_channel_audioplayer invokeMethod:@"audio.onComplete" arguments:@{@"playerId": playerId}];
 }
 
 /// 是否应该结束监听距离感应器
 - (BOOL) _shouldDisableProximityMonitoring:(NSString *) playerId {
     BOOL shouldDisable = true;
-    NSMutableDictionary* playInfo = players[playerId];
+    NSMutableDictionary* playInfo = ocsPlayers[playerId];
     if (playInfo && playInfo[@"ProximityMonitor"]) {
         [playInfo removeObjectForKey:@"ProximityMonitor"];
     }
-    for (NSDictionary* playInfo in players.allValues) {
+    for (NSDictionary* playInfo in ocsPlayers.allValues) {
         if (playInfo[@"ProximityMonitor"]) {
             shouldDisable = false;
         }
@@ -615,7 +614,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
                       context:(void *)context {
     if ([keyPath isEqualToString: @"player.currentItem.status"]) {
         NSString *playerId = (__bridge NSString*)context;
-        NSMutableDictionary * playerInfo = players[playerId];
+        NSMutableDictionary * playerInfo = ocsPlayers[playerId];
         AVPlayer *player = playerInfo[@"player"];
         
         NSLog(@"player status: %ld",(long)[[player currentItem] status ]);
@@ -624,13 +623,13 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
         if ([[player currentItem] status ] == AVPlayerItemStatusReadyToPlay) {
             [self updateDuration:playerId];
             
-            VoidCallback onReady = playerInfo[@"onReady"];
+            OCSVoidCallback onReady = playerInfo[@"onReady"];
             if (onReady != nil) {
                 [playerInfo removeObjectForKey:@"onReady"];
                 onReady(playerId);
             }
         } else if ([[player currentItem] status ] == AVPlayerItemStatusFailed) {
-            [_channel_audioplayer invokeMethod:@"audio.onError" arguments:@{@"playerId": playerId, @"value": @"AVPlayerItemStatus.failed"}];
+            [_ocs_channel_audioplayer invokeMethod:@"audio.onError" arguments:@{@"playerId": playerId, @"value": @"AVPlayerItemStatus.failed"}];
         }
     } else {
         // Any unrecognized context must belong to super
@@ -642,22 +641,22 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 }
 
 - (void)destory {
-    for (id value in timeobservers)
+    for (id value in ocs_timeobservers)
         [value[@"player"] removeTimeObserver:value[@"observer"]];
-    timeobservers = nil;
+    ocs_timeobservers = nil;
     
-    for (NSString* playerId in players) {
-        NSMutableDictionary * playerInfo = players[playerId];
+    for (NSString* playerId in ocsPlayers) {
+        NSMutableDictionary * playerInfo = ocsPlayers[playerId];
         NSMutableSet * observers = playerInfo[@"observers"];
         for (id ob in observers)
             [[NSNotificationCenter defaultCenter] removeObserver:ob];
     }
     
-    for (id value in deviceObservers) {
+    for (id value in ocs_deviceObservers) {
         [[NSNotificationCenter defaultCenter] removeObserver:value];
     }
     
-    players = nil;
+    ocsPlayers = nil;
 }
 
 - (void)dealloc {
