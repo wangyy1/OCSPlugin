@@ -182,7 +182,7 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
                 this.sensorManager.unregisterListener(this);
             }
             this.sensorManager = null;
-            if (wakeLock.isHeld())
+            if (wakeLock != null && wakeLock.isHeld())
                 wakeLock.release();
             wakeLock = null;
         }
