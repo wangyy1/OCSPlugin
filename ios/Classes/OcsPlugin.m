@@ -30,7 +30,7 @@
 
 @end
 
-NSString *const AudioplayersPluginStop = @"OCSAudioplayersPluginStop";
+NSString *const OCSAudioplayersPluginStop = @"OCSAudioplayersPluginStop";
 typedef void (^OCSVoidCallback)(NSString * playerId);
 /// 播放时间的一些监听器
 NSMutableSet *ocs_timeobservers;
@@ -259,7 +259,7 @@ static NSMutableDictionary * ocsPlayers;
         _ocs_is_dealloc = false;
         ocsPlayers = [[NSMutableDictionary alloc] init];
         // 监听插件暂停，但是这个通知不知道在什么位置发送的
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(needStop) name:AudioplayersPluginStop object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(needStop) name:OCSAudioplayersPluginStop object:nil];
         // 监听距离感应器的变化，用来切换听筒还是扬声器
         id observer = [[NSNotificationCenter defaultCenter] addObserverForName:UIDeviceProximityStateDidChangeNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
             if (![self isHeadSetPlugging]) {
