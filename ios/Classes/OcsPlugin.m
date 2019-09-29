@@ -18,7 +18,7 @@
  */
 - (void)onGetNetworkState:(int)iError{
     NSLog(@"onGetNetworkState: %@", @(iError));
-}
+}git
 
 /**
  *返回授权验证错误
