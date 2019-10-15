@@ -47,6 +47,7 @@ public class OcsPlugin implements MethodCallHandler {
         channel.setMethodCallHandler(new OcsPlugin(registrar, locationDelegate));
 
         AudioplayersPlugin.registerWith(registrar);
+        NotificationPlugin.registerWith(registrar);
     }
 
     @Override

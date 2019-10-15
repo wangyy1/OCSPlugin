@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/ocs_audio_player.dart';
 import 'package:ocs_plugin/location_info.dart';
+import 'package:ocs_plugin/ocs_message_notification.dart';
 
 const kUrl1 = 'https://luan.xyz/files/audio/ambient_c_motion.mp3';
 const kUrl2 = 'https://luan.xyz/files/audio/nasa_on_a_mission.mp3';
@@ -24,7 +25,6 @@ class _MyAppState extends State<MyApp> {
   double _longitude = 116.100201;
   String _address = '';
 
-
   @override
   void initState() {
     super.initState();
@@ -32,8 +32,8 @@ class _MyAppState extends State<MyApp> {
 
     // 注册百度key
     // 这里输入自己注册的百度key
-    if(Platform.isIOS) {
-      OcsPlugin.registerKey('1QnYI8z9TTWkwWX5iHBPrUPd').then((success){
+    if (Platform.isIOS) {
+      OcsPlugin.registerKey('1QnYI8z9TTWkwWX5iHBPrUPd').then((success) {
         print('register Baidu key: $success');
       });
     }
@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
               child: Text('选择位置'),
               onPressed: () async {
                 LocationInfo locationInfo = await OcsPlugin.sendLocation();
-                if(locationInfo != null) {
+                if (locationInfo != null) {
                   setState(() {
                     _latitude = locationInfo.latitude;
                     _longitude = locationInfo.longitude;
@@ -86,7 +86,8 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
               child: Text('查看位置'),
               onPressed: () {
-                OcsPlugin.lookLocation('$_latitude', '$_longitude', '$_address');
+                OcsPlugin.lookLocation(
+                    '$_latitude', '$_longitude', '$_address');
               },
             ),
             RaisedButton(
@@ -96,9 +97,34 @@ class _MyAppState extends State<MyApp> {
                 player.play(kUrl1, proximityMonitoringEnabled: false);
               },
             ),
+            RaisedButton(
+              child: Text('显示一个通知+角标'),
+              onPressed: () {
+                OcsMessageNotification ocsMessageNotification =
+                    OcsMessageNotification();
+                ocsMessageNotification.initialize(
+                    onSelectNotification: selectNotificationCallback);
+                Future.delayed(Duration(milliseconds: 3000), () {
+                  ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 1, payload: '哈哈');
+                });
+              },
+            ),
+            RaisedButton(
+              child: Text('清楚通知+角标'),
+              onPressed: () {
+                OcsMessageNotification ocsMessageNotification =
+                    OcsMessageNotification();
+                ocsMessageNotification.cancel();
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<dynamic> selectNotificationCallback(String payload) async {
+    print('$payload');
   }
 }
