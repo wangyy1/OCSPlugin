@@ -82,10 +82,14 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
      * @return
      */
     public Bitmap getBitmapFromByte(byte[] temp) {
-        if (temp != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(temp, 0, temp.length);
-            return bitmap;
-        } else {
+        try {
+            if (temp != null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(temp, 0, temp.length);
+                return bitmap;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
             return null;
         }
     }

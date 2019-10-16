@@ -76,7 +76,6 @@ public class BadgeUtils {
     private static NotificationManager notificationManager;
 
     public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, Bitmap largeIcon, String contentTitle, String contentText, Intent intent) {
-        Log.e("------------", "setNotificationBadge: " + largeIcon.toString());
         if (notificationManager == null) {
             notificationManager = (NotificationManager) context.getSystemService
                     (Context.NOTIFICATION_SERVICE);
