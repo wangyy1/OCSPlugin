@@ -3,8 +3,6 @@ package com.jzxl.ocs_plugin;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import com.jzxl.ocs_plugin.audioplayer.HeadsetReceiver;
 import com.jzxl.ocs_plugin.utils.BadgeUtils;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -21,17 +19,14 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
 
     public static void registerWith(final Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.notification.channel");
-        channel.setMethodCallHandler(new NotificationPlugin(channel, registrar.activity()));
+        channel.setMethodCallHandler(new NotificationPlugin(channel, registrar));
     }
 
-    private NotificationPlugin(final MethodChannel channel, Activity activity) {
+    private NotificationPlugin(final MethodChannel channel, Registrar registrar) {
         this.channel = channel;
         this.channel.setMethodCallHandler(this);
-        this.activity = activity;
-        HeadsetReceiver headsetPlugReceiver = new HeadsetReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
-        activity.registerReceiver(headsetPlugReceiver, intentFilter);
+        this.activity = registrar.activity();
+        registrar.addNewIntentListener(this);
     }
 
     @Override
