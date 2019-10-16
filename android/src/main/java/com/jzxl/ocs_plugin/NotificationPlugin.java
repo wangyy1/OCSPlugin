@@ -3,7 +3,12 @@ package com.jzxl.ocs_plugin;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+
 import com.jzxl.ocs_plugin.utils.BadgeUtils;
+
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -49,10 +54,12 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                 String contentTitle = call.argument("contentTitle");
                 String contentText = call.argument("contentText");
                 String payload = call.argument("payload");
+                byte[] largeIcon = call.argument("largeIcon");
+                Bitmap bitmap = largeIcon != null ? getBitmapFromByte(largeIcon) : null;
                 Intent intent = new Intent(activity, getMainActivityClass(activity));
                 intent.setAction(SELECT_NOTIFICATION);
                 intent.putExtra(PAYLOAD, payload);
-                BadgeUtils.setNotificationBadge(notificationId, count, activity, iconName, contentTitle, contentText, intent);
+                BadgeUtils.setNotificationBadge(notificationId, count, activity, iconName, bitmap, contentTitle, contentText, intent);
                 break;
             }
             case "cancel": {
@@ -64,6 +71,22 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                 response.notImplemented();
                 return;
             }
+        }
+    }
+
+
+    /**
+     * 将二进制文件转化为Bitmap
+     *
+     * @param temp
+     * @return
+     */
+    public Bitmap getBitmapFromByte(byte[] temp) {
+        if (temp != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(temp, 0, temp.length);
+            return bitmap;
+        } else {
+            return null;
         }
     }
 

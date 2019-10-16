@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -38,14 +40,15 @@ class OcsMessageNotification {
   /// [count] 通知数量
   /// [payload] 点击通知后传递的内容
   Future<void> show(String iconName, String contentTitle, String contentText,
-      {int count = 0, String payload = '', int notificationId = 0}) async {
+      {int count = 0, String payload = '', int notificationId = 0, Uint8List largeIcon}) async {
     await _channel.invokeMethod('show', <String, dynamic>{
       'notificationId': notificationId,
       'count': count,
       'iconName': iconName,
       'contentTitle': contentTitle,
       'contentText': contentText,
-      'payload': payload
+      'payload': payload,
+      'largeIcon': largeIcon
     });
   }
 

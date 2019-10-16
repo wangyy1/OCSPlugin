@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -74,33 +75,34 @@ public class BadgeUtils {
 
     private static NotificationManager notificationManager;
 
-    public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, String contentTitle, String contentText, Intent intent) {
+    public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, Bitmap largeIcon, String contentTitle, String contentText, Intent intent) {
+        Log.e("------------", "setNotificationBadge: " + largeIcon.toString());
         if (notificationManager == null) {
             notificationManager = (NotificationManager) context.getSystemService
                     (Context.NOTIFICATION_SERVICE);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // 8.0之后添加角标需要NotificationChannel
-            NotificationChannel channel = new NotificationChannel("badge", "badge",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel("chat", "聊天消息",
+                    NotificationManager.IMPORTANCE_HIGH);
             channel.setShowBadge(true);
             notificationManager.createNotificationChannel(channel);
         }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new NotificationCompat.Builder(context, "badge")
+        Notification notification = new NotificationCompat.Builder(context, "chat")
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), getDrawableResourceId(context, iconName)))
+                .setLargeIcon(largeIcon == null ? BitmapFactory.decodeResource(context.getResources(), getDrawableResourceId(context, iconName)) : largeIcon)
                 .setSmallIcon(getDrawableResourceId(context, iconName))
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setChannelId("badge")
+                .setChannelId("chat")
                 .setNumber(count)
                 .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL).build();
         // 小米
         if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
-            setXiaomiBadge(count, notification);
+            setXiaomiBadge(1, notification);
         } else {
             setCount(count, context);
         }
