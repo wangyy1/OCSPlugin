@@ -33,14 +33,14 @@ import java.util.List;
  * @since 2018/11/28
  */
 public class BadgeUtils {
-    private static int notificationId = 1;
     private static final String DRAWABLE = "drawable";
 
     public static boolean setCount(final int count, final Context context) {
         if (count >= 0 && context != null) {
             Log.d("BRAND", Build.BRAND);
             switch (Build.BRAND.toLowerCase()) {
-//                case "xiaomi":
+                case "xiaomi":
+                    // 小米手机不支持直接设置角标
 //                    new Handler().postDelayed(new Runnable() {
 //                        @Override
 //                        public void run() {
@@ -48,7 +48,7 @@ public class BadgeUtils {
 //                        }
 //                    }, 3000);
 //                    Toast.makeText(context, "请切到后台，3秒后会收到通知", Toast.LENGTH_SHORT).show();
-//                    return true;
+                    return true;
                 case "huawei":
                 case "honor":
                     return setHuaweiBadge(count, context);
@@ -74,12 +74,11 @@ public class BadgeUtils {
 
     private static NotificationManager notificationManager;
 
-    public static boolean setNotificationBadge(int count, Context context, String iconName, String contentTitle, String contentText, Intent intent) {
+    public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, String contentTitle, String contentText, Intent intent) {
         if (notificationManager == null) {
             notificationManager = (NotificationManager) context.getSystemService
                     (Context.NOTIFICATION_SERVICE);
         }
-        notificationManager.cancel(notificationId);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // 8.0之后添加角标需要NotificationChannel
             NotificationChannel channel = new NotificationChannel("badge", "badge",
@@ -115,7 +114,7 @@ public class BadgeUtils {
             notificationManager = (NotificationManager) context.getSystemService
                     (Context.NOTIFICATION_SERVICE);
         }
-        notificationManager.cancel(notificationId);
+        notificationManager.cancelAll();
     }
 
     private static void setXiaomiBadge(int count, Notification notification) {
