@@ -110,8 +110,52 @@ class _MyAppState extends State<MyApp> {
                     onSelectNotification: selectNotificationCallback);
                 Future.delayed(Duration(milliseconds: 3000), () async {
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
-                      count: 100, payload: '哈哈', notificationId: 5,
+                      count: 1, payload: '哈哈', notificationId: 1,
                   largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 2, payload: '哈哈', notificationId: 2,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 3, payload: '哈哈', notificationId: 3,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 4, payload: '哈哈', notificationId: 4,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 5, payload: '哈哈', notificationId: 5,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 6, payload: '哈哈', notificationId: 6,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 7, payload: '哈哈', notificationId: 7,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 8, payload: '哈哈', notificationId: 8,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 9, payload: '哈哈', notificationId: 9,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 10, payload: '哈哈', notificationId: 10,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 11, payload: '哈哈', notificationId: 11,
+                      largeIcon: base64.decode(pic)
+                  );
+                  await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      count: 15, payload: '哈哈', notificationId: 11,
+                      largeIcon: base64.decode(pic)
                   );
                 });
               },
