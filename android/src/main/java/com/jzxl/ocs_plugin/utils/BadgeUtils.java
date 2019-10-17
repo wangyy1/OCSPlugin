@@ -25,7 +25,6 @@ import androidx.core.app.NotificationCompat;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -36,11 +35,6 @@ import java.util.List;
  */
 public class BadgeUtils {
     private static final String DRAWABLE = "drawable";
-
-    /**
-     * 保存通知ID
-     */
-    private static HashSet<Integer> saveNotificationId = new HashSet<>();
 
     public static boolean setCount(final int count, final Context context) {
         if (count >= 0 && context != null) {
@@ -93,7 +87,6 @@ public class BadgeUtils {
             channel.setShowBadge(true);
             notificationManager.createNotificationChannel(channel);
         }
-
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new NotificationCompat.Builder(context, "chat")
                 .setContentTitle(contentTitle)
@@ -107,20 +100,16 @@ public class BadgeUtils {
                 .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL).build();
         // 小米
         if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
-            int notificationCount = saveNotificationId.size();
-            // 小米手机最多显示9个通知
-            setXiaomiBadge(count - (notificationCount > 9 ? 9 : notificationCount), notification);
+            setXiaomiBadge(1, notification);
         } else {
             setCount(count, context);
         }
         notificationManager.notify(notificationId, notification);
-        saveNotificationId.add(new Integer(notificationId));
         return true;
     }
 
 
     public static void cancelNotification(Context context) {
-        saveNotificationId.clear();
         if (notificationManager == null) {
             notificationManager = (NotificationManager) context.getSystemService
                     (Context.NOTIFICATION_SERVICE);
