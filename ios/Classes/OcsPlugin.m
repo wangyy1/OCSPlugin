@@ -5,6 +5,7 @@
 #import <UIKit/UIKit.h>
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import "WLAppJump.h"
 
 @interface BMKRegisterDelegate : NSObject <BMKGeneralDelegate>
 
@@ -62,14 +63,31 @@ static NSMutableDictionary * ocsPlayers;
 
 @implementation OcsPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    
+
     OcsPlugin* instance = [[OcsPlugin alloc] init];
-    
+
     FlutterMethodChannel* channel = [FlutterMethodChannel
                                      methodChannelWithName:@"ocs_plugin"
                                      binaryMessenger:[registrar messenger]];
-    // 设置handler没有用
-    [channel setMethodCallHandler:^(FlutterMethodCall * _Nonnull call, FlutterResult  _Nonnull result) {
+    // 处理收到消息的回调
+    [self handleOCSChannel:channel];
+
+    FlutterMethodChannel* audioPlayer_channel = [FlutterMethodChannel
+                                                 methodChannelWithName:@"ocs.audioPlayer.channel"
+                                                 binaryMessenger:[registrar messenger]];
+
+    [self handleAudioChannel:audioPlayer_channel plugin:instance];
+
+    [WLAppJump handleChannelWithRegistrar:registrar];
+
+
+    //    OcsPlugin* instance = [[OcsPlugin alloc] init];
+    //    [registrar addMethodCallDelegate:instance channel:channel];
+}
+
+#pragma mark - 处理OCSPlugin的消息接收
++ (void)handleOCSChannel:(FlutterMethodChannel *)ocsChannel {
+    [ocsChannel setMethodCallHandler:^(FlutterMethodCall * _Nonnull call, FlutterResult  _Nonnull result) {
         if ([@"getPlatformVersion" isEqualToString:call.method]) {
             result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
         } else if([@"registerKey" isEqualToString:call.method]) {
@@ -115,20 +133,14 @@ static NSMutableDictionary * ocsPlayers;
             result(FlutterMethodNotImplemented);
         }
     }];
-    
-    FlutterMethodChannel* audioPlayer_channel = [FlutterMethodChannel
-                                                 methodChannelWithName:@"ocs.audioPlayer.channel"
-                                                 binaryMessenger:[registrar messenger]];
+}
+
++ (void)handleAudioChannel:(FlutterMethodChannel *)audioPlayer_channel plugin:(OcsPlugin *)instance {
     _ocs_channel_audioplayer = audioPlayer_channel;
-    
+
     [audioPlayer_channel setMethodCallHandler:^(FlutterMethodCall * _Nonnull call, FlutterResult  _Nonnull result) {
-        
-        
         NSString * playerId = call.arguments[@"playerId"];
-        NSLog(@"iOS => call %@, playerId %@", call.method, playerId);
-        
         typedef void (^CaseBlock)(void);
-        
         // Squint and this looks like a proper switch!
         NSDictionary *methods = @{
                                   @"play":
@@ -187,17 +199,17 @@ static NSMutableDictionary * ocsPlayers;
                                           NSString *url = call.arguments[@"url"];
                                           int isLocal = [call.arguments[@"isLocal"]intValue];
                                           [instance setUrl:url
-                                                isLocal:isLocal
-                                               playerId:playerId
-                                           proximityMonitoringEnabled:false
-                                                onReady:^(NSString * playerId) {
-                                                    result(@(1));
-                                                }
+                                                   isLocal:isLocal
+                                                  playerId:playerId
+                                proximityMonitoringEnabled:false
+                                                   onReady:^(NSString * playerId) {
+                                                       result(@(1));
+                                                   }
                                            ];
                                       },
                                   @"getDuration":
                                       ^{
-                                          
+
                                           int duration = [instance getDuration:playerId];
                                           NSLog(@"getDuration: %i ", duration);
                                           result(@(duration));
@@ -225,7 +237,7 @@ static NSMutableDictionary * ocsPlayers;
                                           }
                                       }
                                   };
-        
+
         // 根据playerId初始化播放信息
         [ instance initPlayerInfo:playerId ];
         // 根据不同的通道方法获取对应的执行block，然后执行
@@ -239,12 +251,12 @@ static NSMutableDictionary * ocsPlayers;
         if(![call.method isEqualToString:@"setUrl"]) {
             result(@(1));
         }
-        
+
     }];
-    
-    
-//    OcsPlugin* instance = [[OcsPlugin alloc] init];
-//    [registrar addMethodCallDelegate:instance channel:channel];
+}
+
++ (void)handleAppSkipChannel:(FlutterMethodChannel *)appSkipChannel {
+
 }
 
 - (instancetype)init
@@ -254,7 +266,7 @@ static NSMutableDictionary * ocsPlayers;
         UINavigationBar.appearance.barTintColor = [UIColor colorWithRed:42.0/255 green:151.0/255 blue:240.0/255 alpha:1];
         UINavigationBar.appearance.tintColor = [UIColor whiteColor];
         UINavigationBar.appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
-        
+
         // 设置音频播放的一些默认设置
         _ocs_is_dealloc = false;
         ocsPlayers = [[NSMutableDictionary alloc] init];
@@ -265,7 +277,7 @@ static NSMutableDictionary * ocsPlayers;
             if (![self isHeadSetPlugging]) {
                 if ([[UIDevice currentDevice] proximityState]) {
                     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-                
+
                     for (NSString* playerId in ocsPlayers) {
                         NSMutableDictionary* playInfo = ocsPlayers[playerId];
                         if (playInfo[@"ProximityMonitor"]) {
@@ -277,17 +289,17 @@ static NSMutableDictionary * ocsPlayers;
                 }
             }
         }];
-        
+
         id observer1 = [[NSNotificationCenter defaultCenter] addObserverForName:AVAudioSessionRouteChangeNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
             //          AVAudioSessionRouteDescription *routeDescription=note.userInfo[AVAudioSessionRouteChangePreviousRouteKey];
             //          AVAudioSessionRouteChangeReason reason = [note.userInfo[AVAudioSessionRouteChangeReasonKey] intValue];
             //          AVAudioSessionPortDescription *portDescription= [routeDescription.outputs firstObject];
         }];
-        
+
         if (ocs_deviceObservers == nil) {
             ocs_deviceObservers = [NSMutableSet set];
         }
-        
+
         [ocs_deviceObservers addObject:observer];
         [ocs_deviceObservers addObject:observer1];
     }
@@ -339,9 +351,9 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
     NSMutableSet *observers = playerInfo[@"observers"];
     // 用来播放的item
     AVPlayerItem *playerItem;
-    
+
     NSLog(@"setUrl %@", url);
-    
+
     // 如果还没有播放信息，或者url不一致，重新生成playerItem，添加或者替换掉原来的item
     if (!playerInfo || ![url isEqualToString:playerInfo[@"url"]]) {
         if (isLocal) {
@@ -349,7 +361,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
         } else {
             playerItem = [ [ AVPlayerItem alloc ] initWithURL:[ NSURL URLWithString:url ]];
         }
-        
+
         if (playerInfo[@"url"]) {
             // 移除播放状态监听
             [[player currentItem] removeObserver:self forKeyPath:@"player.currentItem.status" ];
@@ -367,13 +379,13 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
             // 创建player
             player = [[ AVPlayer alloc ] initWithPlayerItem: playerItem ];
             observers = [[NSMutableSet alloc] init];
-            
+
             // 为播放信息添加播放器，url，和观察者缓存
             [ playerInfo setObject:player forKey:@"player" ];
             [ playerInfo setObject:url forKey:@"url" ];
             [ playerInfo setObject:observers forKey:@"observers" ];
             [ playerInfo setObject:@(proximityMonitoringEnabled) forKey:@"ProximityMonitor" ];
-            
+
             // stream player position
             // 在每秒60帧的情况下，0.2秒的间隔帧
             CMTime interval = CMTimeMakeWithSeconds(0.2, NSEC_PER_SEC);
@@ -385,7 +397,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
             // 混存监听对象
             [ocs_timeobservers addObject:@{@"player":player, @"observer":timeObserver}];
         }
-        
+
         // 在通知中心监听播放播放完成，完成后执行对应的回调
         id anobserver = [[ NSNotificationCenter defaultCenter ] addObserverForName: AVPlayerItemDidPlayToEndTimeNotification
                                                                             object: playerItem
@@ -395,7 +407,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
                                                                         }];
         // 将播放完成监听器加入混存
         [observers addObject:anobserver];
-        
+
         // is sound ready
         // 设置播放信息的状态为准备完成状态
         [playerInfo setObject:onReady forKey:@"onReady"];
@@ -404,7 +416,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
                      forKeyPath:@"player.currentItem.status"
                         options:0
                         context:(void*)playerId];
-        
+
     } else {
         // 如果缓存的player是准备好状态，则完成准备
         if ([[player currentItem] status ] == AVPlayerItemStatusReadyToPlay) {
@@ -431,7 +443,7 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 {
     NSError *error = nil;
     AVAudioSessionCategory category = AVAudioSessionCategoryAmbient;
-    
+
     // 设置播放类别
     BOOL success = [[AVAudioSession sharedInstance]
                     setCategory: category
@@ -439,16 +451,16 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
     if (!success) {
         NSLog(@"Error setting speaker: %@", error);
     }
-    
+
     // 设置公用的播放session
     [[AVAudioSession sharedInstance] setActive:YES error:&error];
-    
+
     // 初始化播放状态，在完成回调进行播放
     typeof(self) __weak weakSelf = self;
     [ self setUrl:url
           isLocal:isLocal
          playerId:playerId
-     proximityMonitoringEnabled:proximityMonitoringEnabled
+proximityMonitoringEnabled:proximityMonitoringEnabled
           onReady:^(NSString * playerId) {
               NSMutableDictionary * playerInfo = ocsPlayers[playerId];
               if(proximityMonitoringEnabled) {

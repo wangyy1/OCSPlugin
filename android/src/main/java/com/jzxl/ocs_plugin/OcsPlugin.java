@@ -34,6 +34,7 @@ public class OcsPlugin implements MethodCallHandler {
 
         AudioplayersPlugin.registerWith(registrar);
         NotificationPlugin.registerWith(registrar);
+        AppJump.registerWith(registrar);
     }
 
     @Override

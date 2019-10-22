@@ -9,6 +9,7 @@ import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/ocs_audio_player.dart';
 import 'package:ocs_plugin/location_info.dart';
 import 'package:ocs_plugin/ocs_message_notification.dart';
+import 'package:ocs_plugin/app_jump.dart';
 
 const kUrl1 = 'https://luan.xyz/files/audio/ambient_c_motion.mp3';
 const kUrl2 = 'https://luan.xyz/files/audio/nasa_on_a_mission.mp3';
@@ -162,6 +163,17 @@ class _MyAppState extends State<MyApp> {
                 OcsMessageNotification ocsMessageNotification =
                     OcsMessageNotification();
                 ocsMessageNotification.cancel();
+              },
+            ),
+            RaisedButton(
+              child: Text('跳转QQ'),
+              onPressed: () {
+                if(Platform.isIOS) {
+                  AppJump.jumpToApp('mqq');
+                } else {
+                  AppJump.jumpToApp('com.tencent.mobileqq');
+                }
+
               },
             ),
           ],
