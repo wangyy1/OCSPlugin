@@ -32,6 +32,9 @@ public class AppJump implements MethodChannel.MethodCallHandler {
             if (intent != null) {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 activity.startActivity(intent);
+                result.success(true);
+            } else {
+                result.success(false);
             }
         }
     }
