@@ -176,6 +176,14 @@ class _MyAppState extends State<MyApp> {
 
               },
             ),
+            RaisedButton(
+              child: Text('拨号'),
+              onPressed: () {
+                AppJump.jumpToSystemApp(SystemAppJump.CALL).then((value) {
+                  print('$value');
+                });
+              },
+            ),
           ],
         ),
       ),
