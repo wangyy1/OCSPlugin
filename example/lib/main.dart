@@ -38,9 +38,6 @@ class _MyAppState extends State<MyApp> {
     // 注册百度key
     // 这里输入自己注册的百度key
     if (Platform.isIOS) {
-      OcsPlugin.registerKey('1QnYI8z9TTWkwWX5iHBPrUPd').then((success) {
-        print('register Baidu key: $success');
-      });
     }
   }
 
@@ -75,26 +72,6 @@ class _MyAppState extends State<MyApp> {
           children: <Widget>[
             Text('Running on: $_platformVersion\n'),
             Text('$_longitude-$_latitude-$_address'),
-            RaisedButton(
-              child: Text('选择位置'),
-              onPressed: () async {
-                LocationInfo locationInfo = await OcsPlugin.sendLocation();
-                if (locationInfo != null) {
-                  setState(() {
-                    _latitude = locationInfo.latitude;
-                    _longitude = locationInfo.longitude;
-                    _address = locationInfo.address;
-                  });
-                }
-              },
-            ),
-            RaisedButton(
-              child: Text('查看位置'),
-              onPressed: () {
-                OcsPlugin.lookLocation(
-                    '$_latitude', '$_longitude', '$_address');
-              },
-            ),
             RaisedButton(
               child: Text('播放语音'),
               onPressed: () {
@@ -174,6 +151,14 @@ class _MyAppState extends State<MyApp> {
                   AppJump.jumpToApp('com.tencent.mobileqq');
                 }
 
+              },
+            ),
+            RaisedButton(
+              child: Text('拨号'),
+              onPressed: () {
+                AppJump.jumpToSystemApp(SystemAppJump.CALL).then((value) {
+                  print('$value');
+                });
               },
             ),
           ],
