@@ -16,7 +16,6 @@ A new Flutter plugin.
   s.resources = ['Assets/*.png']
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'BaiduMapKit', '~>4.1.1'
 
   s.ios.deployment_target = '8.0'
 end
