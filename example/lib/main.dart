@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/ocs_audio_player.dart';
-import 'package:ocs_plugin/location_info.dart';
 import 'package:ocs_plugin/ocs_message_notification.dart';
 import 'package:ocs_plugin/app_jump.dart';
 
