@@ -1,6 +1,7 @@
 package com.jzxl.ocs_plugin;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
@@ -32,21 +33,21 @@ public class AudioplayersPlugin implements MethodCallHandler {
     private final Map<String, Player> mediaPlayers = new HashMap<>();
     private final Handler handler = new Handler();
     private Runnable positionUpdates;
-    private final Activity activity;
+    private final Context context;
 
     public static void registerWith(final Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.audioPlayer.channel");
-        channel.setMethodCallHandler(new AudioplayersPlugin(channel, registrar.activity()));
+        channel.setMethodCallHandler(new AudioplayersPlugin(channel, registrar.context()));
     }
 
-    private AudioplayersPlugin(final MethodChannel channel, Activity activity) {
+    private AudioplayersPlugin(final MethodChannel channel, Context context) {
         this.channel = channel;
         this.channel.setMethodCallHandler(this);
-        this.activity = activity;
+        this.context = context;
         HeadsetReceiver headsetPlugReceiver = new HeadsetReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.HEADSET_PLUG");
-        activity.registerReceiver(headsetPlugReceiver, intentFilter);
+        context.registerReceiver(headsetPlugReceiver, intentFilter);
     }
 
     @Override
@@ -73,10 +74,10 @@ public class AudioplayersPlugin implements MethodCallHandler {
                 final boolean stayAwake = call.argument("stayAwake");
                 if (proximityEnable) {
                     Log.e(TAG, "handleMethodCall: SPEAKER" );
-                    player.configAttributes(PlayerModel.values()[0], stayAwake, activity.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[0], stayAwake, context.getApplicationContext());
                 } else  {
                     Log.e(TAG, "handleMethodCall: STETHOSCOPE" );
-                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[1], stayAwake, context.getApplicationContext());
                 }
                 player.setVolume(volume);
                 player.setUrl(url, isLocal);
@@ -155,7 +156,7 @@ public class AudioplayersPlugin implements MethodCallHandler {
 
     private Player getPlayer(String playerId) {
         if (!mediaPlayers.containsKey(playerId)) {
-            Player player = new WrappedMediaPlayer(this, playerId, activity);
+            Player player = new WrappedMediaPlayer(this, playerId, context);
             mediaPlayers.put(playerId, player);
         }
         return mediaPlayers.get(playerId);

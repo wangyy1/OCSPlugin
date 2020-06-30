@@ -20,7 +20,7 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
     private static final String PAYLOAD = "payload";
 
     private final MethodChannel channel;
-    private final Activity activity;
+    private final Context context;
 
     public static void registerWith(final Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.notification.channel");
@@ -30,7 +30,7 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
     private NotificationPlugin(final MethodChannel channel, Registrar registrar) {
         this.channel = channel;
         this.channel.setMethodCallHandler(this);
-        this.activity = registrar.activity();
+        this.context = registrar.context();
         registrar.addNewIntentListener(this);
     }
 
@@ -56,15 +56,15 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                 String payload = call.argument("payload");
                 byte[] largeIcon = call.argument("largeIcon");
                 Bitmap bitmap = largeIcon != null ? getBitmapFromByte(largeIcon) : null;
-                Intent intent = new Intent(activity, getMainActivityClass(activity));
+                Intent intent = new Intent(context, getMainActivityClass(context));
                 intent.setAction(SELECT_NOTIFICATION);
                 intent.putExtra(PAYLOAD, payload);
-                BadgeUtils.setNotificationBadge(notificationId, count, activity, iconName, bitmap, contentTitle, contentText, intent);
+                BadgeUtils.setNotificationBadge(notificationId, count, context, iconName, bitmap, contentTitle, contentText, intent);
                 break;
             }
             case "cancel": {
-                BadgeUtils.cancelNotification(activity);
-                BadgeUtils.setCount(0, activity);
+                BadgeUtils.cancelNotification(context);
+                BadgeUtils.setCount(0, context);
                 break;
             }
             default: {
