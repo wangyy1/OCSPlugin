@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -73,48 +74,49 @@ public class BadgeUtils {
         }
     }
 
-    private static NotificationManager notificationManager;
 
     public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, Bitmap largeIcon, String contentTitle, String contentText, Intent intent) {
-        if (notificationManager == null) {
-            notificationManager = (NotificationManager) context.getSystemService
-                    (Context.NOTIFICATION_SERVICE);
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             // 8.0之后添加角标需要NotificationChannel
-            NotificationChannel channel = new NotificationChannel("chat", "聊天消息",
+            NotificationChannel channel = new NotificationChannel("com.ocs.flutter.channel_id", "新消息通知",
                     NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("程序收到新消息时使用的通知类别");
             channel.setShowBadge(true);
-            notificationManager.createNotificationChannel(channel);
+            channel.enableVibration(true);
+            channel.enableLights(true);
+            nm.createNotificationChannel(channel);
         }
+
+        NotificationManagerCompat nmc = NotificationManagerCompat.from(context);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new NotificationCompat.Builder(context, "chat")
+        Notification notification = new NotificationCompat.Builder(context, "com.ocs.flutter.channel_id")
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
                 .setLargeIcon(largeIcon == null ? BitmapFactory.decodeResource(context.getResources(), getDrawableResourceId(context, iconName)) : largeIcon)
                 .setSmallIcon(getDrawableResourceId(context, iconName))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setChannelId("chat")
+                .setChannelId("com.ocs.flutter.channel_id")
                 .setNumber(count)
-                .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL).build();
+                .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE) // 通知类型
+                .build();
         // 小米
         if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
             setXiaomiBadge(1, notification);
         } else {
             setCount(count, context);
         }
-        notificationManager.notify(notificationId, notification);
+        nmc.notify(notificationId, notification);
         return true;
     }
 
 
     public static void cancelNotification(Context context) {
-        if (notificationManager == null) {
-            notificationManager = (NotificationManager) context.getSystemService
-                    (Context.NOTIFICATION_SERVICE);
-        }
-        notificationManager.cancelAll();
+        NotificationManagerCompat.from(context).cancelAll();
     }
 
     private static void setXiaomiBadge(int count, Notification notification) {
