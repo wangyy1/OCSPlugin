@@ -39,7 +39,7 @@ class OcsMessageNotification {
   /// [contentText] 通知内容
   /// [count] 通知数量
   /// [payload] 点击通知后传递的内容
-  Future<void> show(String iconName, String contentTitle, String contentText,
+  Future<void> show(String iconName, String contentTitle, String contentText, String className,
       {int count = 0, String payload = '', int notificationId = 0, Uint8List largeIcon}) async {
     await _channel.invokeMethod('show', <String, dynamic>{
       'notificationId': notificationId,
@@ -48,7 +48,8 @@ class OcsMessageNotification {
       'contentTitle': contentTitle,
       'contentText': contentText,
       'payload': payload,
-      'largeIcon': largeIcon
+      'largeIcon': largeIcon,
+      'className': className,
     });
   }
 

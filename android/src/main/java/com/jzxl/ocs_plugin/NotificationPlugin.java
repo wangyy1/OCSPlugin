@@ -55,10 +55,16 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                 String contentText = call.argument("contentText");
                 String payload = call.argument("payload");
                 byte[] largeIcon = call.argument("largeIcon");
+                String className = call.argument("className");
                 Bitmap bitmap = largeIcon != null ? getBitmapFromByte(largeIcon) : null;
-                Intent intent = new Intent(context, getMainActivityClass(context));
-                intent.setAction(SELECT_NOTIFICATION);
-                intent.putExtra(PAYLOAD, payload);
+                Intent intent = null;
+                try {
+                    intent = new Intent(context, Class.forName(className));
+                    intent.setAction(SELECT_NOTIFICATION);
+                    intent.putExtra(PAYLOAD, payload);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
                 BadgeUtils.setNotificationBadge(notificationId, count, context, iconName, bitmap, contentTitle, contentText, intent);
                 break;
             }

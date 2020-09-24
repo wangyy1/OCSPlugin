@@ -87,46 +87,57 @@ class _MyAppState extends State<MyApp> {
                     onSelectNotification: selectNotificationCallback);
                 Future.delayed(Duration(milliseconds: 3000), () async {
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 1, payload: '哈哈', notificationId: 1,
                   largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 2, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 3, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 4, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 5, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 6, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 7, payload: '哈哈', notificationId: 2,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 8, payload: '哈哈', notificationId: 2,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 9, payload: '哈哈', notificationId: 3,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 10, payload: '哈哈', notificationId: 3,
                       largeIcon: base64.decode(pic)
                   );
                   await ocsMessageNotification.show('ic_launcher', '测试1（1条新消息）', '消息内容',
+                      'com.jzxl.ocs_plugin_example.MainActivity',
                       count: 11, payload: '哈哈', notificationId: 1,
                       largeIcon: base64.decode(pic)
                   );
