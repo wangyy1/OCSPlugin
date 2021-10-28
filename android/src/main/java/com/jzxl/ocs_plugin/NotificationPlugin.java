@@ -7,32 +7,26 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.jzxl.ocs_plugin.utils.BadgeUtils;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-public class NotificationPlugin implements MethodCallHandler, PluginRegistry.NewIntentListener {
+public class NotificationPlugin implements MethodCallHandler, PluginRegistry.NewIntentListener, FlutterPlugin, ActivityAware {
     private static final String SELECT_NOTIFICATION = "SELECT_NOTIFICATION";
     private static final String PAYLOAD = "payload";
 
-    private final MethodChannel channel;
-    private final Context context;
-
-    public static void registerWith(final Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.notification.channel");
-        channel.setMethodCallHandler(new NotificationPlugin(channel, registrar));
-    }
-
-    private NotificationPlugin(final MethodChannel channel, Registrar registrar) {
-        this.channel = channel;
-        this.channel.setMethodCallHandler(this);
-        this.context = registrar.context();
-        registrar.addNewIntentListener(this);
-    }
+    private FlutterPluginBinding mFlutterPluginBinding;
+    private MethodChannel channel;
+    private Activity activity;
 
     @Override
     public void onMethodCall(final MethodCall call, final MethodChannel.Result response) {
@@ -59,18 +53,18 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                 Bitmap bitmap = largeIcon != null ? getBitmapFromByte(largeIcon) : null;
                 Intent intent = null;
                 try {
-                    intent = new Intent(context, Class.forName(className));
+                    intent = new Intent(activity, Class.forName(className));
                     intent.setAction(SELECT_NOTIFICATION);
                     intent.putExtra(PAYLOAD, payload);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                BadgeUtils.setNotificationBadge(notificationId, count, context, iconName, bitmap, contentTitle, contentText, intent);
+                BadgeUtils.setNotificationBadge(notificationId, count, activity, iconName, bitmap, contentTitle, contentText, intent);
                 break;
             }
             case "cancel": {
-                BadgeUtils.cancelNotification(context);
-                BadgeUtils.setCount(0, context);
+                BadgeUtils.cancelNotification(activity);
+                BadgeUtils.setCount(0, activity);
                 break;
             }
             default: {
@@ -130,5 +124,38 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+        mFlutterPluginBinding = binding;
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        channel = new MethodChannel(mFlutterPluginBinding.getBinaryMessenger(), "ocs.notification.channel");
+        channel.setMethodCallHandler(this);
+        this.activity = binding.getActivity();
+        binding.addOnNewIntentListener(this);
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+
     }
 }

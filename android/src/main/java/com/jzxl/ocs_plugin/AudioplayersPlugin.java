@@ -6,6 +6,8 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.jzxl.ocs_plugin.audioplayer.HeadsetReceiver;
 import com.jzxl.ocs_plugin.audioplayer.Player;
 import com.jzxl.ocs_plugin.audioplayer.PlayerModel;
@@ -18,37 +20,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-public class AudioplayersPlugin implements MethodCallHandler {
+public class AudioplayersPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
     private static final String TAG = "AudioplayersPlugin";
     
     
     private static final Logger LOGGER = Logger.getLogger(AudioplayersPlugin.class.getCanonicalName());
 
-    private final MethodChannel channel;
+    private FlutterPluginBinding mFlutterPluginBinding;
+    private MethodChannel channel;
     private final Map<String, Player> mediaPlayers = new HashMap<>();
     private final Handler handler = new Handler();
     private Runnable positionUpdates;
-    private final Context context;
-
-    public static void registerWith(final Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "ocs.audioPlayer.channel");
-        channel.setMethodCallHandler(new AudioplayersPlugin(channel, registrar.context()));
-    }
-
-    private AudioplayersPlugin(final MethodChannel channel, Context context) {
-        this.channel = channel;
-        this.channel.setMethodCallHandler(this);
-        this.context = context;
-        HeadsetReceiver headsetPlugReceiver = new HeadsetReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
-        context.registerReceiver(headsetPlugReceiver, intentFilter);
-    }
+    private Activity activity;
 
     @Override
     public void onMethodCall(final MethodCall call, final MethodChannel.Result response) {
@@ -74,10 +64,10 @@ public class AudioplayersPlugin implements MethodCallHandler {
                 final boolean stayAwake = call.argument("stayAwake");
                 if (proximityEnable) {
                     Log.e(TAG, "handleMethodCall: SPEAKER" );
-                    player.configAttributes(PlayerModel.values()[0], stayAwake, context.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[0], stayAwake, activity.getApplicationContext());
                 } else  {
                     Log.e(TAG, "handleMethodCall: STETHOSCOPE" );
-                    player.configAttributes(PlayerModel.values()[1], stayAwake, context.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
                 }
                 player.setVolume(volume);
                 player.setUrl(url, isLocal);
@@ -156,7 +146,7 @@ public class AudioplayersPlugin implements MethodCallHandler {
 
     private Player getPlayer(String playerId) {
         if (!mediaPlayers.containsKey(playerId)) {
-            Player player = new WrappedMediaPlayer(this, playerId, context);
+            Player player = new WrappedMediaPlayer(this, playerId, activity);
             mediaPlayers.put(playerId, player);
         }
         return mediaPlayers.get(playerId);
@@ -192,6 +182,43 @@ public class AudioplayersPlugin implements MethodCallHandler {
         result.put("playerId", playerId);
         result.put("value", value);
         return result;
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+        this.mFlutterPluginBinding = binding;
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        channel = new MethodChannel(mFlutterPluginBinding.getBinaryMessenger(), "ocs.audioPlayer.channel");
+        channel.setMethodCallHandler(this);
+
+        this.activity = binding.getActivity();
+        HeadsetReceiver headsetPlugReceiver = new HeadsetReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+        this.activity.registerReceiver(headsetPlugReceiver, intentFilter);
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        channel.setMethodCallHandler(null);
     }
 
     private static final class UpdateCallback implements Runnable {
