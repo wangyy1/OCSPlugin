@@ -39,11 +39,19 @@ class OcsMessageNotification {
   /// [contentText] 通知内容
   /// [count] 通知数量
   /// [payload] 点击通知后传递的内容
+  /// 显示一个通知
+  /// [iconName] 通知图标
+  /// [contentTitle] 通知标题
+  /// [contentText] 通知内容
+  /// [count] 单个通知数字
+  /// [sumCount] api26以下使用，显示角标数字，api26以上使用count数字（如果有两个通知，则显示两个通知count的和）
+  /// [payload] 点击通知后传递的内容
   Future<void> show(String iconName, String contentTitle, String contentText, String className,
-      {int count = 0, String payload = '', int notificationId = 0, Uint8List largeIcon}) async {
+      {int count = 0, int sumCount = 0, String payload = '', int notificationId = 0, Uint8List largeIcon}) async {
     await _channel.invokeMethod('show', <String, dynamic>{
       'notificationId': notificationId,
       'count': count,
+      'sumCount': sumCount,
       'iconName': iconName,
       'contentTitle': contentTitle,
       'contentText': contentText,
