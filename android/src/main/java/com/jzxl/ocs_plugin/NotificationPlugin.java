@@ -43,6 +43,7 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
         switch (call.method) {
             case "show": {
                 int count = call.argument("count");
+                int sumCount = call.argument("sumCount");
                 int notificationId = call.argument("notificationId");
                 String iconName = call.argument("iconName");
                 String contentTitle = call.argument("contentTitle");
@@ -56,10 +57,12 @@ public class NotificationPlugin implements MethodCallHandler, PluginRegistry.New
                     intent = new Intent(activity, Class.forName(className));
                     intent.setAction(SELECT_NOTIFICATION);
                     intent.putExtra(PAYLOAD, payload);
+//                    intent = activity.getPackageManager().getLaunchIntentForPackage(className);
+
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                BadgeUtils.setNotificationBadge(notificationId, count, activity, iconName, bitmap, contentTitle, contentText, intent);
+                BadgeUtils.setNotificationBadge(notificationId, count, sumCount, activity, iconName, bitmap, contentTitle, contentText, intent);
                 break;
             }
             case "cancel": {
