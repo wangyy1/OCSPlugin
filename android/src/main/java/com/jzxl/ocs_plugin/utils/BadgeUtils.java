@@ -75,7 +75,20 @@ public class BadgeUtils {
     }
 
 
-    public static boolean setNotificationBadge(int notificationId, int count, Context context, String iconName, Bitmap largeIcon, String contentTitle, String contentText, Intent intent) {
+    /**
+     * 
+     * @param notificationId
+     * @param count 单个通知数字
+     * @param sumCount api26以下使用，显示角标数字，api26以上使用count数字（如果有两个通知，则显示两个通知count的和），
+     * @param context
+     * @param iconName
+     * @param largeIcon
+     * @param contentTitle
+     * @param contentText
+     * @param intent
+     * @return
+     */
+    public static boolean setNotificationBadge(int notificationId, int count, int sumCount, Context context, String iconName, Bitmap largeIcon, String contentTitle, String contentText, Intent intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             // 8.0之后添加角标需要NotificationChannel
@@ -83,8 +96,9 @@ public class BadgeUtils {
                     NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("程序收到新消息时使用的通知类别");
             channel.setShowBadge(true);
-            channel.enableVibration(true);
+            channel.enableVibration(false);
             channel.enableLights(true);
+            channel.setSound(null, null);
             nm.createNotificationChannel(channel);
         }
 
@@ -101,14 +115,17 @@ public class BadgeUtils {
                 .setContentIntent(pendingIntent)
                 .setChannelId("com.ocs.flutter.channel_id")
                 .setNumber(count)
+                .setSound(null)
                 .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE) // 通知类型
                 .build();
-        // 小米
-        if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
-            setXiaomiBadge(1, notification);
-        } else {
-            setCount(count, context);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // 小米
+            if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
+                setXiaomiBadge(1, notification);
+            } else {
+                setCount(sumCount, context);
+            }
         }
         nmc.notify(notificationId, notification);
         return true;
