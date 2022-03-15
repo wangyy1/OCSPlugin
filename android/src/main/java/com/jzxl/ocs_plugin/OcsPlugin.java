@@ -1,8 +1,10 @@
 package com.jzxl.ocs_plugin;
 
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -40,6 +42,12 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
     private AudioplayersPlugin audioplayersPlugin;
     // 通知插件
     private NotificationPlugin notificationPlugin;
+    // 指纹插件
+    private BiometricPlugin biometricPlugin;
+
+    public OcsPlugin() {
+        biometricPlugin = new BiometricPlugin();
+    }
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
@@ -51,10 +59,10 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         audioplayersPlugin = new AudioplayersPlugin();
         notificationPlugin = new NotificationPlugin();
 
-
         appJump.onAttachedToEngine(binding);
         audioplayersPlugin.onAttachedToEngine(binding);
         notificationPlugin.onAttachedToEngine(binding);
+        biometricPlugin.onAttachedToEngine(binding);
 
 //        AudioplayersPlugin.registerWith(registrar);
 //        NotificationPlugin.registerWith(registrar);
@@ -68,6 +76,7 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         appJump.onDetachedFromEngine(binding);
         audioplayersPlugin.onDetachedFromEngine(binding);
         notificationPlugin.onDetachedFromEngine(binding);
+        biometricPlugin.onDetachedFromEngine(binding);
     }
 
     @Override
@@ -75,6 +84,7 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         appJump.onAttachedToActivity(binding);
         audioplayersPlugin.onAttachedToActivity(binding);
         notificationPlugin.onAttachedToActivity(binding);
+        biometricPlugin.onAttachedToActivity(binding);
     }
 
     @Override
@@ -82,6 +92,7 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         appJump.onDetachedFromActivityForConfigChanges();
         audioplayersPlugin.onDetachedFromActivityForConfigChanges();
         notificationPlugin.onDetachedFromActivityForConfigChanges();
+        biometricPlugin.onDetachedFromActivityForConfigChanges();
     }
 
     @Override
@@ -89,6 +100,7 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         appJump.onReattachedToActivityForConfigChanges(binding);
         audioplayersPlugin.onReattachedToActivityForConfigChanges(binding);
         notificationPlugin.onReattachedToActivityForConfigChanges(binding);
+        biometricPlugin.onReattachedToActivityForConfigChanges(binding);
     }
 
     @Override
@@ -96,6 +108,7 @@ public class OcsPlugin implements MethodCallHandler, FlutterPlugin, ActivityAwar
         appJump.onDetachedFromActivity();
         audioplayersPlugin.onDetachedFromActivity();
         notificationPlugin.onDetachedFromActivity();
+        biometricPlugin.onDetachedFromActivity();
     }
 
     @Override

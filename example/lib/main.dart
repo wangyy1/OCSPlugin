@@ -9,6 +9,7 @@ import 'package:ocs_plugin/ocs_plugin.dart';
 import 'package:ocs_plugin/ocs_audio_player.dart';
 import 'package:ocs_plugin/ocs_message_notification.dart';
 import 'package:ocs_plugin/app_jump.dart';
+import 'package:ocs_plugin/ocs_biometric.dart';
 
 const kUrl1 = 'https://luan.xyz/files/audio/ambient_c_motion.mp3';
 const kUrl2 = 'https://luan.xyz/files/audio/nasa_on_a_mission.mp3';
@@ -169,6 +170,18 @@ class _MyAppState extends State<MyApp> {
                 AppJump.jumpToSystemApp(SystemAppJump.CALL).then((value) {
                   print('$value');
                 });
+              },
+            ),
+            RaisedButton(
+              child: Text('检测是否支持生物认证'),
+              onPressed: () {
+                OcsBiometric.canAuthenticate().then((value) => print('检测是否支持生物认证: $value'));
+              },
+            ),
+            RaisedButton(
+              child: Text('生物认证'),
+              onPressed: () {
+                OcsBiometric.authenticate().then((value) => print('生物认证: $value'));
               },
             ),
           ],
