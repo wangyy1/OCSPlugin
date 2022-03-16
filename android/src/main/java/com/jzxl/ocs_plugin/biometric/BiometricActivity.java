@@ -67,7 +67,7 @@ public class BiometricActivity extends AppCompatActivity {
                 super.onAuthenticationError(errorCode, errString);
                 if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
                     authenticateResult.setResult(false);
-                    authenticateResult.setMsg("取消认证");
+                    authenticateResult.setMsg("取消");
                 } else {
                     authenticateResult.setResult(false);
                     authenticateResult.setMsg(errString.toString());
@@ -111,7 +111,7 @@ public class BiometricActivity extends AppCompatActivity {
      */
     private BiometricPrompt.PromptInfo promptInfo (Context context) {
         return new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(getAppName(context) + "登录")
+                .setTitle(getAppName(context) + "认证")
                 .setSubtitle("请验证已有手机指纹")
                 .setNegativeButtonText("取消")
 //                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
