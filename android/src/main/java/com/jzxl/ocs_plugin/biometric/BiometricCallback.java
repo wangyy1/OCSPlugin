@@ -8,16 +8,6 @@ import javax.crypto.Cipher;
 public interface BiometricCallback {
 
     /**
-     * 无生物识别硬件或生物识别硬件不可用
-     */
-    void onHwUnavailable();
-
-    /**
-     * 未添加
-     */
-    void onNoneEnrolled();
-
-    /**
      * 验证成功
      */
     void onSucceeded(Cipher cipher);

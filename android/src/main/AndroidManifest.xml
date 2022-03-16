@@ -21,6 +21,10 @@
 
     <application android:theme="@style/AppTheme">
 
+    <activity android:name=".biometric.BiometricActivity"
+        android:theme="@style/Biometric.AppTheme"
+        />
+
     </application>
 
 </manifest>

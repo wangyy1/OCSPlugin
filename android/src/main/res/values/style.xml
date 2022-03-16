@@ -7,4 +7,20 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <!-- 透明Activity -->
+    <style name="Biometric.AppTheme" parent="@style/AppTheme">
+        <!-- 设置窗口透明 -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- 设置背景颜色，必须设置 -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- 设置状态栏透明 -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <!-- 禁用Activity默认动画 -->
+        <item name="android:windowAnimationStyle">@null</item>
+        <!-- 设置页面全屏 true 状态栏会隐藏-->
+        <item name="android:windowFullscreen">false</item>
+    </style>
+
+
 </resources>

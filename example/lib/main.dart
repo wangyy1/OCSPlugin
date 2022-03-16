@@ -181,7 +181,7 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
               child: Text('生物认证'),
               onPressed: () {
-                OcsBiometric.authenticate().then((value) => print('生物认证: $value'));
+                OcsBiometric.authenticate().then((value) => print('生物认证: ${value.msg}'));
               },
             ),
           ],

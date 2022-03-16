@@ -3,22 +3,19 @@ package com.jzxl.ocs_plugin;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.widget.Toast;
+import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
-import androidx.fragment.app.FragmentActivity;
 
-import com.jzxl.ocs_plugin.biometric.BiometricCallback;
-import com.jzxl.ocs_plugin.biometric.BiometricVerifyManager;
-import com.jzxl.ocs_plugin.utils.BadgeUtils;
+import com.jzxl.ocs_plugin.biometric.AuthenticateResult;
+import com.jzxl.ocs_plugin.biometric.BiometricActivity;
+import com.jzxl.ocs_plugin.biometric.EnumType;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.crypto.Cipher;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -28,12 +25,12 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry;
 
-public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
-
+public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware, PluginRegistry.ActivityResultListener {
+    
     private FlutterPluginBinding mFlutterPluginBinding;
     private MethodChannel channel;
     private Activity mActivity;
-    private BiometricVerifyManager mBiometricVerifyManager;
+    private MethodChannel.Result mResponse;
 
     @Override
     public void onMethodCall(final MethodCall call, final MethodChannel.Result response) {
@@ -45,45 +42,19 @@ public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, Activi
     }
 
     private void handleMethodCall(final MethodCall call, final MethodChannel.Result response) {
+        this.mResponse = response;
         switch (call.method) {
             case "canAuthenticate": {
-                response.success(mBiometricVerifyManager.canAuthenticate(mActivity));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    response.success(canAuthenticate(mActivity).result);
+                } else {
+                    response.success(EnumType.BiometricResult.NO_HARDWARE);
+                }
                 break;
             }
             case "authenticate": {
-                if (mActivity instanceof FragmentActivity) {
-                    Map<String, String> result = new HashMap<>();
-                    mBiometricVerifyManager.setCallback(new BiometricCallback() {
-                        @Override
-                        public void onHwUnavailable() {
-                            result.put("RESULT", "UNAVAILABLE");
-                            response.success(result);
-                        }
-
-                        @Override
-                        public void onNoneEnrolled() {
-                            result.put("RESULT", "NONE_ENROLLED");
-                            response.success(result);
-                        }
-
-                        @Override
-                        public void onSucceeded(Cipher cipher) {
-                            result.put("RESULT", "SUCCEEDED");
-                            response.success(result);
-                        }
-
-                        @Override
-                        public void onFailed() {
-//                            Toast.makeText(mActivity, "指纹不匹配", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onError() {
-                            result.put("RESULT", "ERROR");
-                            response.success(result);
-                        }
-                    });
-                    mBiometricVerifyManager.authenticate((FragmentActivity) mActivity);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    BiometricActivity.startActivity(mActivity);
                 }
                 break;
             }
@@ -92,6 +63,27 @@ public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, Activi
                 return;
             }
         }
+    }
+
+
+    private EnumType.BiometricResult canAuthenticate(Context context) {
+        BiometricManager biometricManager = BiometricManager.from(context);
+//        switch (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+        switch (biometricManager.canAuthenticate()) {
+            case BiometricManager.BIOMETRIC_SUCCESS:
+                Log.d("MY_APP_TAG", "App can authenticate using biometrics.");
+                return EnumType.BiometricResult.SUCCESS;
+            case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
+                Log.e("MY_APP_TAG", "No biometric features available on this device.");
+                return EnumType.BiometricResult.NO_HARDWARE;
+            case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                Log.e("MY_APP_TAG", "Biometric features are currently unavailable.");
+                return EnumType.BiometricResult.HW_UNAVAILABLE;
+            case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
+                // Prompts the user to create credentials that your app accepts.
+                return EnumType.BiometricResult.NONE_ENROLLED;
+        }
+        return EnumType.BiometricResult.NO_HARDWARE;
     }
 
     @Override
@@ -109,7 +101,7 @@ public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, Activi
         channel = new MethodChannel(mFlutterPluginBinding.getBinaryMessenger(), "ocs.biometric.channel");
         channel.setMethodCallHandler(this);
         this.mActivity = binding.getActivity();
-        mBiometricVerifyManager = new BiometricVerifyManager();
+        binding.addActivityResultListener(this);
     }
 
     @Override
@@ -125,5 +117,23 @@ public class BiometricPlugin implements MethodCallHandler, FlutterPlugin, Activi
     @Override
     public void onDetachedFromActivity() {
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != mActivity.RESULT_OK) {
+            return false;
+        }
+        switch (requestCode) {
+            case BiometricActivity.REQUEST_CODE_AUTHENTICATE:
+                AuthenticateResult result = BiometricActivity.getAuthenticateResult(data);
+                Map<String, Object> map = new HashMap<>();
+                map.put("result", result.result());
+                map.put("msg", result.getMsg());
+                mResponse.success(map);
+                break;
+        }
+        return false;
     }
 }
