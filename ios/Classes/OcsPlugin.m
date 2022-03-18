@@ -6,6 +6,7 @@
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import "WLAppJump.h"
+#import "WLBiometricsHelper.h"
 
 //@interface BMKRegisterDelegate : NSObject <BMKGeneralDelegate>
 //
@@ -79,7 +80,7 @@ static NSMutableDictionary * ocsPlayers;
     [self handleAudioChannel:audioPlayer_channel plugin:instance];
 
     [WLAppJump handleChannelWithRegistrar:registrar];
-
+    [[WLBiometricsHelper shared] handleChannelWithRegistrar:registrar];
 
     //    OcsPlugin* instance = [[OcsPlugin alloc] init];
     //    [registrar addMethodCallDelegate:instance channel:channel];
