@@ -443,8 +443,9 @@ proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
         time: (CMTime) time
 proximityMonitoringEnabled:(BOOL)proximityMonitoringEnabled
 {
+    [self removeMonitorProximityMonitor];
     NSError *error = nil;
-    AVAudioSessionCategory category = AVAudioSessionCategoryAmbient;
+    AVAudioSessionCategory category = proximityMonitoringEnabled ? AVAudioSessionCategoryPlayback : AVAudioSessionCategoryPlayAndRecord;
 
     // 设置播放类别
     BOOL success = [[AVAudioSession sharedInstance]
