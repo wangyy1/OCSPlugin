@@ -26,7 +26,7 @@ import java.util.concurrent.Executor;
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class BiometricActivity extends AppCompatActivity {
     
-    public static final int REQUEST_CODE_AUTHENTICATE = 1;
+    public static final int REQUEST_CODE_AUTHENTICATE = 3001;
     // 加密
     private static final String EXTRA_ENCRYPT = "EXTRA_ENCRYPT";
     // 向量
