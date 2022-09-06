@@ -41,10 +41,13 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
     private Sensor sensor;
     private PowerManager.WakeLock wakeLock;
 
+    private AudioManager mAudioManager;
+
     public WrappedMediaPlayer(AudioplayersPlugin ref, String playerId, Context context) {
         this.ref = ref;
         this.playerId = playerId;
         this.context = context;
+        this.mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     private void addSensorListener() {
@@ -185,6 +188,8 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
             if (wakeLock != null && wakeLock.isHeld())
                 wakeLock.release();
             wakeLock = null;
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            mAudioManager.setSpeakerphoneOn(true);
         }
     }
 
@@ -298,10 +303,14 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
                 case VOICE_CALL:
                     usage = AudioAttributes.USAGE_VOICE_COMMUNICATION;
                     contentType = AudioAttributes.CONTENT_TYPE_SPEECH;
+                    mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    mAudioManager.setSpeakerphoneOn(false);
                     break;
                 case MUSIC:
                     usage = AudioAttributes.USAGE_MEDIA;
                     contentType = AudioAttributes.CONTENT_TYPE_MUSIC;
+                    mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    mAudioManager.setSpeakerphoneOn(true);
                     break;
 //                case NOTIFICATION:
 //                    usage = AudioAttributes.USAGE_NOTIFICATION;
@@ -327,9 +336,13 @@ public class WrappedMediaPlayer extends Player implements MediaPlayer.OnPrepared
             switch (playerModel) {
                 case VOICE_CALL:
                     streamType = AudioManager.STREAM_VOICE_CALL;
+                    mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    mAudioManager.setSpeakerphoneOn(false);
                     break;
                 case MUSIC:
                     streamType = AudioManager.STREAM_MUSIC;
+                    mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    mAudioManager.setSpeakerphoneOn(true);
                     break;
 //                case NOTIFICATION:
 //                    streamType = AudioManager.STREAM_NOTIFICATION;

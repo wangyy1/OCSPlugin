@@ -64,10 +64,10 @@ public class AudioplayersPlugin implements MethodCallHandler, FlutterPlugin, Act
                 final boolean stayAwake = call.argument("stayAwake");
                 if (proximityEnable) {
                     Log.e(TAG, "handleMethodCall: SPEAKER" );
-                    player.configAttributes(PlayerModel.values()[0], stayAwake, activity.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
                 } else  {
                     Log.e(TAG, "handleMethodCall: STETHOSCOPE" );
-                    player.configAttributes(PlayerModel.values()[1], stayAwake, activity.getApplicationContext());
+                    player.configAttributes(PlayerModel.values()[0], stayAwake, activity.getApplicationContext());
                 }
                 player.setVolume(volume);
                 player.setUrl(url, isLocal);
