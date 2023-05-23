@@ -264,11 +264,6 @@ static NSMutableDictionary * ocsPlayers;
 - (instancetype)init
 {
     if (self = [super init]) {
-        // 设置导航和flutter的默认导航颜色一致
-        UINavigationBar.appearance.barTintColor = [UIColor colorWithRed:42.0/255 green:151.0/255 blue:240.0/255 alpha:1];
-        UINavigationBar.appearance.tintColor = [UIColor whiteColor];
-        UINavigationBar.appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
-
         // 设置音频播放的一些默认设置
         _ocs_is_dealloc = false;
         ocsPlayers = [[NSMutableDictionary alloc] init];
