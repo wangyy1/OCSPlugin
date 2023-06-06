@@ -184,6 +184,12 @@ class _MyAppState extends State<MyApp> {
                 OcsBiometric.authenticate().then((value) => print('生物认证: ${value.msg}'));
               },
             ),
+            ElevatedButton(
+              child: Text('使用WPS打开文件'),
+              onPressed: () {
+                AppJump.openFileByWPS("/storage/emulated/0/Download/android.txt");
+              },
+            ),
           ],
         ),
       ),

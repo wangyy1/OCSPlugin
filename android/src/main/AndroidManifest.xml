@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.jzxl.ocs_plugin">
 
 
@@ -21,9 +22,22 @@
 
     <application android:theme="@style/AppTheme">
 
-    <activity android:name=".biometric.BiometricActivity"
-        android:theme="@style/Biometric.AppTheme"
-        />
+        <activity android:name=".biometric.BiometricActivity"
+            android:theme="@style/Biometric.AppTheme"
+            />
+
+
+        <provider
+            android:name="com.jzxl.ocs_plugin.provider.FileProvider"
+            android:authorities="${applicationId}.fileProvider.com.jzxl.ocs_plugin.openfile"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths"
+                />
+        </provider>
 
     </application>
 

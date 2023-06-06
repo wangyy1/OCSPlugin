@@ -3,9 +3,16 @@ package com.jzxl.ocs_plugin;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+
+import com.jzxl.ocs_plugin.provider.FileProvider;
+import com.jzxl.ocs_plugin.utils.AppUtils;
+
+import java.io.File;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -59,6 +66,25 @@ public class AppJump implements MethodChannel.MethodCallHandler, FlutterPlugin, 
                 Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 activity.startActivity(intent);
+            } else if ("Thirdparty.WPS.open.file".equals(method)) { // 通过 WPS 打开文件
+                String filePath = methodCall.argument("file_path");
+                if (filePath == null || filePath.length() == 0) {
+                    result.success(false);
+                    return;
+                }
+                if (!AppUtils.isInstall(activity, "cn.wps.moffice_eng")) {
+                    result.success(false);
+                    return;
+                }
+
+                File file = new File(filePath);
+                if (!file.exists()) {
+                    result.success(false);
+                    return;
+                }
+                boolean isOpen = AppUtils.openWps(activity, file);
+                result.success(isOpen);
+                return;
             }
             result.success(true);
         } catch (Exception e) {

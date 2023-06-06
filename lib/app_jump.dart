@@ -30,6 +30,12 @@ class AppJump {
     return await _channel.invokeMethod('appJump.jump', {'identify': identify});
   }
 
+  /// 使用WPS打开文件
+  /// 目前只实现了android功能
+  static Future<bool> openFileByWPS(String filePath) async {
+    return await _channel.invokeMethod('Thirdparty.WPS.open.file', {'file_path': filePath});
+  }
+
   List<String> systemAppType = ['', '', '', '', '', '', '', '', ''];
 
   /// 跳转系统应用
